@@ -43,7 +43,7 @@ public class BotInitializer extends TelegramLongPollingBot {
         if (update.hasMessage()) {
             Message message = update.getMessage();
             SendMessage response = new SendMessage();
-            Long chatId = message.getChatId();
+            String chatId = "@coronavirus19statistic";
             response.setChatId(chatId);
             String text = message.getText();
             response.setText(text);
