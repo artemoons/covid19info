@@ -31,9 +31,8 @@ public class SiteParser {
             log.info("Web page successfully loaded!");
             return parseInformationFromWebPage(htmlPageContent);
         } catch (IOException ex) {
-            log.error("Error when trying to load site!", ex);
-            //todo what happens here? (avoid returning null value)
-            return new Document(websiteUrl).location();
+            log.error("Error when trying to load site! Message not sent", ex);
+            return "";
         }
     }
 
