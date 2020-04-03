@@ -80,8 +80,15 @@ public class SiteParser {
 
     private Boolean parsedResultEqualsNewResult(final StringBuilder message) {
 
+        String savedLastParseResult;
+
         try {
-            String savedLastParseResult = new String(Files.readAllBytes(Paths.get(syncFileName)));
+            if (Paths.get(syncFileName).toFile().exists()) {
+                savedLastParseResult = new String(Files.readAllBytes(Paths.get(syncFileName)));
+            } else {
+                Files.createFile(Paths.get(syncFileName));
+                savedLastParseResult = "";
+            }
             if (savedLastParseResult.equals(String.valueOf(message.toString().hashCode()))) {
                 log.info("Saved parsed result equals new value.");
                 return true;
