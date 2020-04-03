@@ -1,6 +1,6 @@
 bot:
   token:
-  username: 
+  username:
 
 telegram:
   proxy:
@@ -12,4 +12,8 @@ telegram:
 
 website:
   url: https://xn--80aesfpebagmfblc0a.xn--p1ai/
+
+scheduler:
+  delay: 1200000
+
 

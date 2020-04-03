@@ -4,7 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -16,6 +19,7 @@ import javax.annotation.PostConstruct;
 
 @Service
 @Slf4j
+@EnableScheduling
 public class BotInitializer extends TelegramLongPollingBot {
 
     private SiteParser siteParser;
@@ -31,6 +35,9 @@ public class BotInitializer extends TelegramLongPollingBot {
 
     @Value("${bot.username}")
     private String username;
+
+    @Value("${scheduler.delay}")
+    private Long schedulerDelay;
 
     @Autowired
     public BotInitializer(final DefaultBotOptions options, final SiteParser siteParser) {
@@ -58,7 +65,7 @@ public class BotInitializer extends TelegramLongPollingBot {
         log.info("username: {}, token: {}", username, token);
     }
 
-    @EventListener(ApplicationStartedEvent.class)
+    @Scheduled(fixedDelayString = "${scheduler.delay}")
     public void onSiteUpdateReceived() {
 
         String messageText = siteParser.loadSite(websiteUrl);
@@ -68,8 +75,10 @@ public class BotInitializer extends TelegramLongPollingBot {
                 .enableMarkdown(true);
 
         try {
-            execute(response);
-            log.info("Sent message \"{}\" to {}", messageText, chatId);
+            if (!messageText.equals("")) {
+                execute(response);
+                log.info("Sent message \"{}\" to {}", messageText, chatId);
+            }
         } catch (TelegramApiException ex) {
             log.error("Failed to send message \"{}\" to {} due to error: {}", messageText, chatId, ex.getMessage());
         }

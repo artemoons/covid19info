@@ -37,7 +37,6 @@ public class SiteParser {
         }
     }
 
-
     private String parseInformationFromWebPage(final Document htmlPageContent) {
 
         StringBuilder message = new StringBuilder();
@@ -65,12 +64,10 @@ public class SiteParser {
             saveLastParseResultInfo(message);
             return message.toString();
         } else {
-            log.info("No difference between new and old parse information");
+            log.info("No difference between new and old parse information.");
             return "";
         }
-
     }
-
 
     private void saveLastParseResultInfo(final StringBuilder message) {
         Path path = Paths.get(syncFileName);
