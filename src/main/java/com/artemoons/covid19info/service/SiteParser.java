@@ -31,14 +31,14 @@ public class SiteParser {
                     .get();
             log.debug("Web page content: {}", htmlPageContent.html());
             log.info("Web page successfully loaded!");
-            return parseInformationFromWebPage(htmlPageContent);
+            return parseWebPage(htmlPageContent);
         } catch (IOException ex) {
             log.error("Error when trying to load site! Message not sent", ex);
             return new StringBuilder("");
         }
     }
 
-    private StringBuilder parseInformationFromWebPage(final Document htmlPageContent) {
+    private StringBuilder parseWebPage(final Document htmlPageContent) {
 
         message.setLastUpdateInformation(
                 htmlPageContent.select("div.cv-banner__top > div.cv-banner__description"));

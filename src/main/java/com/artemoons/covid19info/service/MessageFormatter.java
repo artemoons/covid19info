@@ -24,6 +24,10 @@ public class MessageFormatter {
 
     private static final String EMPTY_LINE = "";
 
+    private static final String TITLE_POSTFIX = " (МСК)";
+
+    private static final int TITLE_MESSAGE_INDEX = 0;
+
     public StringBuilder prepareMessageToSend(final Message message) {
         return convertMessageToPlaintext(message);
     }
@@ -34,9 +38,9 @@ public class MessageFormatter {
         List<String> messageLines = new ArrayList<>();
         StringBuilder plaintextMessage = new StringBuilder();
 
-        log.info(message.getLastUpdateInformation().get(0).text());
+        log.info(message.getLastUpdateInformation().get(TITLE_MESSAGE_INDEX).text());
 
-        messageLines.add(setBold(message.getLastUpdateInformation().get(0).text() + " (МСК)"));
+        messageLines.add(setBold(message.getLastUpdateInformation().get(TITLE_MESSAGE_INDEX).text() + TITLE_POSTFIX));
         messageLines.add(EMPTY_LINE);
         //todo replace on foreach
         for (i = 0; i < message.getStatisticDescriptions().size(); i++) {
