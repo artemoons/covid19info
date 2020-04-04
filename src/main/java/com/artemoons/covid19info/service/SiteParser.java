@@ -1,9 +1,9 @@
 package com.artemoons.covid19info.service;
 
+import com.artemoons.covid19info.dto.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -19,11 +21,17 @@ public class SiteParser {
     @Value("${telegram.sync-file-name}")
     private String syncFileName;
 
-    //    @EventListener(ApplicationReadyEvent.class)
-    public String loadSite(final String websiteUrl) {
+    @Value("${message.footer}")
+    private String messageFooter;
+
+    private static final String EMPTY_LINE = "";
+
+    private Message message = new Message();
+
+    public StringBuilder loadSite(final StringBuilder websiteUrl) {
         try {
             log.info("Starting to load page {}...", websiteUrl);
-            Document htmlPageContent = Jsoup.connect(websiteUrl)
+            Document htmlPageContent = Jsoup.connect(websiteUrl.toString())
                     .ignoreHttpErrors(true)
                     .timeout(120 * 1000)
                     .get();
@@ -32,49 +40,64 @@ public class SiteParser {
             return parseInformationFromWebPage(htmlPageContent);
         } catch (IOException ex) {
             log.error("Error when trying to load site! Message not sent", ex);
-            return "";
+            return new StringBuilder("");
         }
     }
 
-    private String parseInformationFromWebPage(final Document htmlPageContent) {
+    private StringBuilder parseInformationFromWebPage(final Document htmlPageContent) {
 
-        StringBuilder message = new StringBuilder();
+        StringBuilder plaintextMessage;
 
-        Elements lastUpdateInformation = htmlPageContent.select("div.cv-banner__top > div.cv-banner__description");
-        Elements statisticNumbers = htmlPageContent.select("div.cv-countdown__item > div.cv-countdown__item-value");
-        Elements statisticDescriptions = htmlPageContent.select("div.cv-countdown__item > div.cv-countdown__item-label");
+        message.setLastUpdateInformation(
+                htmlPageContent.select("div.cv-banner__top > div.cv-banner__description"));
+        message.setStatisticNumbers(
+                htmlPageContent.select("div.cv-countdown__item > div.cv-countdown__item-value"));
+        message.setStatisticDescriptions(
+                htmlPageContent.select("div.cv-countdown__item > div.cv-countdown__item-label"));
 
-        log.info(lastUpdateInformation.get(0).text());
-        message.append("*")
-                .append(lastUpdateInformation.get(0).text())
-                .append("*")
-                .append(System.lineSeparator())
-                .append(System.lineSeparator());
+        plaintextMessage = convertMessageToPlaintext(message);
+        return returnMessageAndSaveHash(plaintextMessage);
+    }
 
-        for (int i = 0; i < statisticNumbers.size(); i++) {
-            log.info(statisticNumbers.get(i).text() + " " + statisticDescriptions.get(i).text().toLowerCase());
-            message.append(statisticNumbers.get(i).text())
-                    .append(" ")
-                    .append(statisticDescriptions.get(i).text().toLowerCase())
-                    .append(System.lineSeparator());
+    private StringBuilder convertMessageToPlaintext(final Message message) {
+
+        int i = 0;
+        List<String> messageLines = new ArrayList<>();
+        StringBuilder plaintextMessage = new StringBuilder();
+
+        log.info(message.getLastUpdateInformation().get(0).text());
+
+        messageLines.add(setBold(message.getLastUpdateInformation().get(0).text() + " (МСК)"));
+        messageLines.add(EMPTY_LINE);
+        //todo replace on foreach
+        for (i = 0; i < message.getStatisticDescriptions().size(); i++) {
+            log.info(message.getStatisticNumbers().get(i).text()
+                    + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
+            messageLines.add(message.getStatisticNumbers().get(i).text()
+                    + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
         }
 
-        if (Boolean.FALSE.equals(parsedResultEqualsNewResult(message))) {
-            saveLastParseResultInfo(message);
-            return message.toString();
+        messageLines.add(EMPTY_LINE);
+        messageLines.add(setItalic(messageFooter));
+
+        for (String item : messageLines) {
+            plaintextMessage.append(item).append(System.lineSeparator());
+        }
+        return plaintextMessage;
+    }
+
+    private StringBuilder returnMessageAndSaveHash(StringBuilder plaintextMessage) {
+        if (previousHashIsDifferent(plaintextMessage)) {
+            saveLastParseResultInfo(plaintextMessage);
+            return plaintextMessage;
         } else {
             log.info("No difference between new and old parse information.");
-            return "";
+            return new StringBuilder("");
         }
     }
 
-    private void saveLastParseResultInfo(final StringBuilder message) {
-        Path path = Paths.get(syncFileName);
-        try {
-            Files.write(path, String.valueOf(message.toString().hashCode()).getBytes());
-        } catch (IOException ex) {
-            log.error("Can't write to file.", ex);
-        }
+    private boolean previousHashIsDifferent(StringBuilder plaintextMessage) {
+        return Boolean.FALSE.equals(parsedResultEqualsNewResult(plaintextMessage));
     }
 
     private Boolean parsedResultEqualsNewResult(final StringBuilder message) {
@@ -98,6 +121,23 @@ public class SiteParser {
         }
         log.info("Saved parsed result different from new value.");
         return false;
+    }
+
+    private void saveLastParseResultInfo(final StringBuilder message) {
+        Path path = Paths.get(syncFileName);
+        try {
+            Files.write(path, String.valueOf(message.toString().hashCode()).getBytes());
+        } catch (IOException ex) {
+            log.error("Can't write last parse result information to file.", ex);
+        }
+    }
+
+    private String setBold(final String text) {
+        return "*" + text + "*";
+    }
+
+    private String setItalic(final String text) {
+        return "_" + text + "_";
     }
 
 }

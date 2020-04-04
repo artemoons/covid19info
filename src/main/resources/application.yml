@@ -1,5 +1,5 @@
 bot:
-  token:
+  token: 
   username:
 
 telegram:
@@ -15,3 +15,6 @@ website:
 
 scheduler:
   delay: 300000
+
+message:
+  footer: via стопкоронавирус.рф

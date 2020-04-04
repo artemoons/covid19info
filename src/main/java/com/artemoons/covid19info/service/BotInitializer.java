@@ -22,7 +22,7 @@ public class BotInitializer extends TelegramLongPollingBot {
     private SiteParser siteParser;
 
     @Value("${website.url}")
-    private String websiteUrl;
+    private StringBuilder websiteUrl;
 
     @Value("${telegram.channel-name}")
     private String chatId;
@@ -65,14 +65,14 @@ public class BotInitializer extends TelegramLongPollingBot {
     @Scheduled(fixedDelayString = "${scheduler.delay}")
     public void onSiteUpdateReceived() {
 
-        String messageText = siteParser.loadSite(websiteUrl);
+        StringBuilder messageText = siteParser.loadSite(websiteUrl);
         SendMessage response = new SendMessage();
         response.setChatId(chatId)
-                .setText(messageText)
+                .setText(messageText.toString())
                 .enableMarkdown(true);
 
         try {
-            if (!messageText.equals("")) {
+            if (messageText.length() != 0) {
                 execute(response);
                 log.info("Sent message \"{}\" to {}", messageText, chatId);
             }
