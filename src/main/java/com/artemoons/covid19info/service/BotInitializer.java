@@ -21,6 +21,8 @@ public class BotInitializer extends TelegramLongPollingBot {
 
     private SiteParser siteParser;
 
+    private HistoryTracker historyTracker;
+
     @Value("${website.url}")
     private StringBuilder websiteUrl;
 
@@ -37,9 +39,10 @@ public class BotInitializer extends TelegramLongPollingBot {
     private Long schedulerDelay;
 
     @Autowired
-    public BotInitializer(final DefaultBotOptions options, final SiteParser siteParser) {
+    public BotInitializer(final DefaultBotOptions options, final SiteParser siteParser, final HistoryTracker historyTracker) {
         super(options);
         this.siteParser = siteParser;
+        this.historyTracker = historyTracker;
     }
 
     @Override
@@ -64,6 +67,9 @@ public class BotInitializer extends TelegramLongPollingBot {
 
     @Scheduled(fixedDelayString = "${scheduler.delay}")
     public void onSiteUpdateReceived() {
+
+//        historyTracker.loadPreviousDayStatistic();
+
 
         StringBuilder messageText = siteParser.loadSite(websiteUrl);
         SendMessage response = new SendMessage();

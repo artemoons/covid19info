@@ -1,7 +1,9 @@
 package com.artemoons.covid19info.service;
 
+import com.artemoons.covid19info.dto.HistoryRecord;
 import com.artemoons.covid19info.dto.Message;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +24,18 @@ public class MessageFormatter {
     @Value("${message.footer}")
     private String messageFooter;
 
+    HistoryTracker historyTracker;
+
     private static final String EMPTY_LINE = "";
 
     private static final String TITLE_POSTFIX = " (МСК)";
 
     private static final int TITLE_MESSAGE_INDEX = 0;
+
+    @Autowired
+    public MessageFormatter(final HistoryTracker historyTracker) {
+        this.historyTracker = historyTracker;
+    }
 
     public StringBuilder prepareMessageToSend(final Message message) {
         return convertMessageToPlaintext(message);
@@ -37,6 +46,10 @@ public class MessageFormatter {
         int i;
         List<String> messageLines = new ArrayList<>();
         StringBuilder plaintextMessage = new StringBuilder();
+
+        Message newMessage = parseNumbersForDeltas(message);
+        HistoryRecord oldMessage = historyTracker.loadPreviousDayStatistic();
+        List<Long> difference = historyTracker.getDifference(newMessage, oldMessage);
 
         log.info(message.getLastUpdateInformation().get(TITLE_MESSAGE_INDEX).text());
 
@@ -59,9 +72,32 @@ public class MessageFormatter {
         return returnPlaintextMessageAndSaveHash(plaintextMessage);
     }
 
+    private String setSign(final Long number) {
+        return number > 0 ? "+" + number : String.valueOf(number);
+    }
+
+    private Message parseNumbersForDeltas(final Message message) {
+
+        List<String> statisticNumbers = new ArrayList<>();
+
+        for (int i = 0; i < message.getStatisticNumbers().size(); i++) {
+            statisticNumbers.add(message.getStatisticNumbers()
+                    .get(i)
+                    .text()
+                    .trim()
+                    .replaceAll("\\D", ""));
+        }
+        message.setTestsOverall(Long.valueOf(statisticNumbers.get(0)));
+        message.setInfectedOverall(Long.valueOf(statisticNumbers.get(1)));
+        message.setInfectedLastDay(Long.valueOf(statisticNumbers.get(2)));
+        message.setHealedOverall(Long.valueOf(statisticNumbers.get(3)));
+        message.setDeathsOverall(Long.valueOf(statisticNumbers.get(4)));
+        return message;
+    }
+
     private StringBuilder returnPlaintextMessageAndSaveHash(StringBuilder plaintextMessage) {
         if (previousHashIsDifferent(plaintextMessage)) {
-            saveLastParseResultInfoHash(plaintextMessage);
+//            saveLastParseResultInfoHash(plaintextMessage);
             return plaintextMessage;
         } else {
             log.info("No difference between new and old parse information.");

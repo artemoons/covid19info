@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -16,6 +17,15 @@ public class SiteParser {
     private Message message = new Message();
 
     private MessageFormatter messageFormatter;
+
+    @Value("${parser.last-update-info}")
+    private String lastUpdateInfoString;
+
+    @Value("${parser.statistic-number}")
+    private String statisticNumberString;
+
+    @Value("${parser.statistic-description}")
+    private String statisticDescriptionString;
 
     @Autowired
     public SiteParser(final MessageFormatter messageFormatter) {
@@ -41,11 +51,11 @@ public class SiteParser {
     private StringBuilder parseWebPage(final Document htmlPageContent) {
 
         message.setLastUpdateInformation(
-                htmlPageContent.select("div.cv-banner__top > div.cv-banner__description"));
+                htmlPageContent.select(lastUpdateInfoString));
         message.setStatisticNumbers(
-                htmlPageContent.select("div.cv-countdown__item > div.cv-countdown__item-value"));
+                htmlPageContent.select(statisticNumberString));
         message.setStatisticDescriptions(
-                htmlPageContent.select("div.cv-countdown__item > div.cv-countdown__item-label"));
+                htmlPageContent.select(statisticDescriptionString));
 
         return messageFormatter.prepareMessageToSend(message);
     }

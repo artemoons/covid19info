@@ -18,3 +18,8 @@ scheduler:
 
 message:
   footer: via стопкоронавирус.рф
+
+parser:
+  last-update-info: div.cv-banner__left > div.cv-banner__description
+  statistic-number: div.cv-countdown__item > div.cv-countdown__item-value
+  statistic-description: div.cv-countdown__item > div.cv-countdown__item-label

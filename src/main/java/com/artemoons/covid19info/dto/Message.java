@@ -16,6 +16,16 @@ public class Message {
 
     private Elements statisticDescriptions;
 
+    private Long testsOverall;
+
+    private Long infectedOverall;
+
+    private Long infectedLastDay;
+
+    private Long healedOverall;
+
+    private Long deathsOverall;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
