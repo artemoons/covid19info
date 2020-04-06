@@ -25,17 +25,19 @@ import java.util.*;
 @Service
 public class HistoryTracker {
 
+    public static final String DD_MM_YYYY = "dd/MM/yyyy";
     String historyRecords;
     String historyFilename = "history-tracker.json";
 
 
 
     public HistoryRecord loadPreviousDayStatistic() {
-        return readStatisticFile().get(readStatisticFile().size() - 1);
+        List<HistoryRecord> statisticFile = readStatisticFile();
+        return statisticFile.get(statisticFile.size() - 1);
     }
 
     private List<HistoryRecord> readStatisticFile() {
-        Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().setDateFormat(DD_MM_YYYY).setPrettyPrinting().create();
         Type collectionType = new TypeToken<List<HistoryRecord>>(){}.getType();
         try {
             if (Paths.get(historyFilename).toFile().exists()) {
@@ -55,20 +57,24 @@ public class HistoryTracker {
         }
     }
 
-    public void saveTodayStatistic() {
+    public void saveTodayStatistic(final Long testsO,
+                                   final Long infectedO,
+                                   final Long infectedY,
+                                   final Long healedO,
+                                   final Long deathO) {
         UUID uuid = UUID.randomUUID();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        List<HistoryRecord> previousStatistic = new ArrayList<>();
+        List<HistoryRecord> previousStatistic;
         previousStatistic = readStatisticFile();
 
         HistoryRecord todayStats = new HistoryRecord();
         todayStats.setRecordId(uuid.toString());
         todayStats.setDate(dateFormat.format( new Date()));
-        todayStats.setTestsOverall(67L);
-        todayStats.setInfectedOverall(34L);
-        todayStats.setInfectedLastDay(900L);
-        todayStats.setHealedOverall(3456L);
-        todayStats.setDeathsOverall(56L);
+        todayStats.setTestsOverall(testsO);
+        todayStats.setInfectedOverall(infectedO);
+        todayStats.setInfectedLastDay(infectedY);
+        todayStats.setHealedOverall(healedO);
+        todayStats.setDeathsOverall(deathO);
 
         previousStatistic.add(todayStats);
         writeStatisticFile(previousStatistic);

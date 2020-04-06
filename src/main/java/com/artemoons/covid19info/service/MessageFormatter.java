@@ -59,8 +59,11 @@ public class MessageFormatter {
         for (i = 0; i < message.getStatisticDescriptions().size(); i++) {
             log.info(message.getStatisticNumbers().get(i).text()
                     + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
-            messageLines.add(message.getStatisticNumbers().get(i).text()
-                    + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
+            if (!message.getStatisticDescriptions().get(i).text().contains("сутки")) {
+                messageLines.add(message.getStatisticNumbers().get(i).text()
+                        + " " + message.getStatisticDescriptions().get(i).text().toLowerCase()
+                        + " " + setItalic("(" + setSign(difference.get(i)) + ")"));
+            }
         }
 
         messageLines.add(EMPTY_LINE);
@@ -69,7 +72,7 @@ public class MessageFormatter {
         for (String item : messageLines) {
             plaintextMessage.append(item).append(System.lineSeparator());
         }
-        return returnPlaintextMessageAndSaveHash(plaintextMessage);
+        return returnPlaintextMessageAndSaveHash(plaintextMessage, message);
     }
 
     private String setSign(final Long number) {
@@ -95,8 +98,13 @@ public class MessageFormatter {
         return message;
     }
 
-    private StringBuilder returnPlaintextMessageAndSaveHash(StringBuilder plaintextMessage) {
+    private StringBuilder returnPlaintextMessageAndSaveHash(final StringBuilder plaintextMessage, final Message message) {
         if (previousHashIsDifferent(plaintextMessage)) {
+            historyTracker.saveTodayStatistic(message.getTestsOverall(),
+                    message.getInfectedOverall(),
+                    message.getInfectedLastDay(),
+                    message.getHealedOverall(),
+                    message.getDeathsOverall());
             saveLastParseResultInfoHash(plaintextMessage);
             return plaintextMessage;
         } else {

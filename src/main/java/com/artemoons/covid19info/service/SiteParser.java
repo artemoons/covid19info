@@ -50,13 +50,16 @@ public class SiteParser {
 
     private StringBuilder parseWebPage(final Document htmlPageContent) {
 
-        message.setLastUpdateInformation(
-                htmlPageContent.select(lastUpdateInfoString));
-        message.setStatisticNumbers(
-                htmlPageContent.select(statisticNumberString));
-        message.setStatisticDescriptions(
-                htmlPageContent.select(statisticDescriptionString));
-
+        try {
+            message.setLastUpdateInformation(
+                    htmlPageContent.select(lastUpdateInfoString));
+            message.setStatisticNumbers(
+                    htmlPageContent.select(statisticNumberString));
+            message.setStatisticDescriptions(
+                    htmlPageContent.select(statisticDescriptionString));
+        } catch (Exception ex) {
+            log.error("Error occurred while parsing web page contents.", ex);
+        }
         return messageFormatter.prepareMessageToSend(message);
     }
 }
