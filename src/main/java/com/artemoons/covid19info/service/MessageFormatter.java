@@ -97,7 +97,7 @@ public class MessageFormatter {
 
     private StringBuilder returnPlaintextMessageAndSaveHash(StringBuilder plaintextMessage) {
         if (previousHashIsDifferent(plaintextMessage)) {
-//            saveLastParseResultInfoHash(plaintextMessage);
+            saveLastParseResultInfoHash(plaintextMessage);
             return plaintextMessage;
         } else {
             log.info("No difference between new and old parse information.");
