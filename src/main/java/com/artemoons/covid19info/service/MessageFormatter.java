@@ -38,7 +38,7 @@ public class MessageFormatter {
     }
 
     public StringBuilder prepareMessageToSend(final Message message) {
-        String newMessageHash = buildHash(message);
+        String newMessageHash = calculateHash(message);
         if (previousHashIsDifferent(newMessageHash)) {
             saveLastParseResultInfoHash(newMessageHash);
             return convertMessageToPlaintext(message);
@@ -46,15 +46,11 @@ public class MessageFormatter {
         return new StringBuilder("");
     }
 
-    private String buildHash(final Message message) {
+    private String calculateHash(final Message message) {
         List<String> messageLines = new ArrayList<>();
         for (int i = 0; i < message.getStatisticDescriptions().size(); i++) {
-            log.info(message.getStatisticNumbers().get(i).text()
+            messageLines.add(message.getStatisticNumbers().get(i).text()
                     + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
-            if (!message.getStatisticDescriptions().get(i).text().contains("сутки")) {
-                messageLines.add(message.getStatisticNumbers().get(i).text()
-                        + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
-            }
         }
         return String.valueOf(messageLines.hashCode());
     }
@@ -115,9 +111,15 @@ public class MessageFormatter {
             log.info(message.getStatisticNumbers().get(i).text()
                     + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
             if (!message.getStatisticDescriptions().get(i).text().contains("сутки")) {
-                messageLines.add(message.getStatisticNumbers().get(i).text()
-                        + " " + message.getStatisticDescriptions().get(i).text().toLowerCase()
-                        + " " + setItalic("(" + setSign(difference.get(i)) + ")"));
+                if (message.getStatisticDescriptions().get(i).text().contains("тест")) {
+                    messageLines.add(message.getStatisticNumbers().get(i).text()
+                            + " " + message.getStatisticDescriptions().get(i).text().toLowerCase()
+                            + " " + setItalic("(" + setSign(difference.get(i)) + " тыс." + ")"));
+                } else {
+                    messageLines.add(message.getStatisticNumbers().get(i).text()
+                            + " " + message.getStatisticDescriptions().get(i).text().toLowerCase()
+                            + " " + setItalic("(" + setSign(difference.get(i)) + ")"));
+                }
             }
         }
 
