@@ -9,12 +9,8 @@ import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,7 +26,6 @@ public class HistoryTracker {
     String historyFilename = "history-tracker.json";
 
 
-
     public HistoryRecord loadPreviousDayStatistic() {
         List<HistoryRecord> statisticFile = readStatisticFile();
         return statisticFile.get(statisticFile.size() - 1);
@@ -38,12 +33,11 @@ public class HistoryTracker {
 
     private List<HistoryRecord> readStatisticFile() {
         Gson gson = new GsonBuilder().setDateFormat(DD_MM_YYYY).setPrettyPrinting().create();
-        Type collectionType = new TypeToken<List<HistoryRecord>>(){}.getType();
+        Type collectionType = new TypeToken<List<HistoryRecord>>() {}.getType();
         try {
             if (Paths.get(historyFilename).toFile().exists()) {
                 historyRecords = new String(Files.readAllBytes(Paths.get(historyFilename)));
                 List<HistoryRecord> historyLog = gson.fromJson(historyRecords, collectionType);
-                log.info(System.lineSeparator() + gson.toJson(historyLog));
                 log.info("Successfully loaded history stats information.");
                 return historyLog;
             } else {
@@ -63,13 +57,13 @@ public class HistoryTracker {
                                    final Long healedO,
                                    final Long deathO) {
         UUID uuid = UUID.randomUUID();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DD_MM_YYYY);
         List<HistoryRecord> previousStatistic;
         previousStatistic = readStatisticFile();
 
         HistoryRecord todayStats = new HistoryRecord();
         todayStats.setRecordId(uuid.toString());
-        todayStats.setDate(dateFormat.format( new Date()));
+        todayStats.setDate(dateFormat.format(new Date()));
         todayStats.setTestsOverall(testsO);
         todayStats.setInfectedOverall(infectedO);
         todayStats.setInfectedLastDay(infectedY);
@@ -83,7 +77,7 @@ public class HistoryTracker {
 
     private void writeStatisticFile(final List<HistoryRecord> statisticData) {
         Path path = Paths.get(historyFilename);
-        Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().setDateFormat(DD_MM_YYYY).setPrettyPrinting().create();
         String json = gson.toJson(statisticData);
         List<String> lines = Arrays.asList(json.split(System.lineSeparator()));
         try {

@@ -33,11 +33,30 @@ public class Message {
         Message message = (Message) o;
         return Objects.equals(lastUpdateInformation, message.lastUpdateInformation) &&
                 Objects.equals(statisticNumbers, message.statisticNumbers) &&
-                Objects.equals(statisticDescriptions, message.statisticDescriptions);
+                Objects.equals(statisticDescriptions, message.statisticDescriptions) &&
+                Objects.equals(testsOverall, message.testsOverall) &&
+                Objects.equals(infectedOverall, message.infectedOverall) &&
+                Objects.equals(infectedLastDay, message.infectedLastDay) &&
+                Objects.equals(healedOverall, message.healedOverall) &&
+                Objects.equals(deathsOverall, message.deathsOverall);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lastUpdateInformation, statisticNumbers, statisticDescriptions);
+        return Objects.hash(lastUpdateInformation, statisticNumbers, statisticDescriptions, testsOverall, infectedOverall, infectedLastDay, healedOverall, deathsOverall);
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "lastUpdateInformation=" + lastUpdateInformation +
+                ", statisticNumbers=" + statisticNumbers +
+                ", statisticDescriptions=" + statisticDescriptions +
+                ", testsOverall=" + testsOverall +
+                ", infectedOverall=" + infectedOverall +
+                ", infectedLastDay=" + infectedLastDay +
+                ", healedOverall=" + healedOverall +
+                ", deathsOverall=" + deathsOverall +
+                '}';
     }
 }

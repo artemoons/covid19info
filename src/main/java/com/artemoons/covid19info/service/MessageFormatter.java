@@ -38,7 +38,62 @@ public class MessageFormatter {
     }
 
     public StringBuilder prepareMessageToSend(final Message message) {
-        return convertMessageToPlaintext(message);
+        String newMessageHash = buildHash(message);
+        if (previousHashIsDifferent(newMessageHash)) {
+            saveLastParseResultInfoHash(newMessageHash);
+            return convertMessageToPlaintext(message);
+        }
+        return new StringBuilder("");
+    }
+
+    private String buildHash(final Message message) {
+        List<String> messageLines = new ArrayList<>();
+        for (int i = 0; i < message.getStatisticDescriptions().size(); i++) {
+            log.info(message.getStatisticNumbers().get(i).text()
+                    + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
+            if (!message.getStatisticDescriptions().get(i).text().contains("сутки")) {
+                messageLines.add(message.getStatisticNumbers().get(i).text()
+                        + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
+            }
+        }
+        return String.valueOf(messageLines.hashCode());
+    }
+
+    private boolean previousHashIsDifferent(String message) {
+        return Boolean.FALSE.equals(getHashFromHistoryAndCompareTo(message));
+    }
+
+    private Boolean getHashFromHistoryAndCompareTo(final String message) {
+
+        String savedLastParseResult;
+
+        try {
+            if (Paths.get(syncFileName).toFile().exists()) {
+                savedLastParseResult = new String(Files.readAllBytes(Paths.get(syncFileName)));
+            } else {
+                Files.createFile(Paths.get(syncFileName));
+                savedLastParseResult = "";
+            }
+            if (savedLastParseResult.equals(message)) {
+                log.info("Saved parsed result equals new value.");
+                return true;
+            }
+            log.debug("Last parse result info: {}", savedLastParseResult);
+        } catch (IOException ex) {
+            log.error("Can't open file with last parsed result", ex);
+        }
+        log.info("Saved parsed result different from new value.");
+        return false;
+    }
+
+    private void saveLastParseResultInfoHash(final String message) {
+        Path path = Paths.get(syncFileName);
+        try {
+            Files.write(path, message.getBytes());
+            log.info("Successfully updated last parse result info hash!");
+        } catch (IOException ex) {
+            log.error("Can't write last parse result information to file.", ex);
+        }
     }
 
     private StringBuilder convertMessageToPlaintext(final Message message) {
@@ -72,11 +127,10 @@ public class MessageFormatter {
         for (String item : messageLines) {
             plaintextMessage.append(item).append(System.lineSeparator());
         }
-        return returnPlaintextMessageAndSaveHash(plaintextMessage, message);
-    }
 
-    private String setSign(final Long number) {
-        return number > 0 ? "+" + number : String.valueOf(number);
+        updateStatistic(message);
+
+        return plaintextMessage;
     }
 
     private Message parseNumbersForDeltas(final Message message) {
@@ -98,56 +152,16 @@ public class MessageFormatter {
         return message;
     }
 
-    private StringBuilder returnPlaintextMessageAndSaveHash(final StringBuilder plaintextMessage, final Message message) {
-        if (previousHashIsDifferent(plaintextMessage)) {
-            historyTracker.saveTodayStatistic(message.getTestsOverall(),
-                    message.getInfectedOverall(),
-                    message.getInfectedLastDay(),
-                    message.getHealedOverall(),
-                    message.getDeathsOverall());
-            saveLastParseResultInfoHash(plaintextMessage);
-            return plaintextMessage;
-        } else {
-            log.info("No difference between new and old parse information.");
-            return new StringBuilder("");
-        }
+    private void updateStatistic(Message message) {
+        historyTracker.saveTodayStatistic(message.getTestsOverall(),
+                message.getInfectedOverall(),
+                message.getInfectedLastDay(),
+                message.getHealedOverall(),
+                message.getDeathsOverall());
     }
 
-    private boolean previousHashIsDifferent(StringBuilder plaintextMessage) {
-        return Boolean.FALSE.equals(parsedResultEqualsNewResult(plaintextMessage));
-    }
-
-    private Boolean parsedResultEqualsNewResult(final StringBuilder message) {
-
-        String savedLastParseResult;
-
-        try {
-            if (Paths.get(syncFileName).toFile().exists()) {
-                savedLastParseResult = new String(Files.readAllBytes(Paths.get(syncFileName)));
-            } else {
-                Files.createFile(Paths.get(syncFileName));
-                savedLastParseResult = "";
-            }
-            if (savedLastParseResult.equals(String.valueOf(message.toString().hashCode()))) {
-                log.info("Saved parsed result equals new value.");
-                return true;
-            }
-            log.debug("Last parse result info: {}", savedLastParseResult);
-        } catch (IOException ex) {
-            log.error("Can't open file with last parsed result", ex);
-        }
-        log.info("Saved parsed result different from new value.");
-        return false;
-    }
-
-    private void saveLastParseResultInfoHash(final StringBuilder message) {
-        Path path = Paths.get(syncFileName);
-        try {
-            Files.write(path, String.valueOf(message.toString().hashCode()).getBytes());
-            log.info("Successfully updated last parse result info hash!");
-        } catch (IOException ex) {
-            log.error("Can't write last parse result information to file.", ex);
-        }
+    private String setSign(final Long number) {
+        return number > 0 ? "+" + number : String.valueOf(number);
     }
 
     private String setBold(final String text) {
@@ -157,6 +171,4 @@ public class MessageFormatter {
     private String setItalic(final String text) {
         return "_" + text + "_";
     }
-
-
 }
