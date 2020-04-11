@@ -1,4 +1,4 @@
-package com.artemoons.covid19info.service;
+package com.artemoons.covid19info.util;
 
 import com.artemoons.covid19info.dto.HistoryRecord;
 import com.artemoons.covid19info.dto.Message;
@@ -33,7 +33,8 @@ public class HistoryTracker {
 
     private List<HistoryRecord> readStatisticFile() {
         Gson gson = new GsonBuilder().setDateFormat(DD_MM_YYYY).setPrettyPrinting().create();
-        Type collectionType = new TypeToken<List<HistoryRecord>>() {}.getType();
+        Type collectionType = new TypeToken<List<HistoryRecord>>() {
+        }.getType();
         try {
             if (Paths.get(historyFilename).toFile().exists()) {
                 historyRecords = new String(Files.readAllBytes(Paths.get(historyFilename)));
@@ -98,4 +99,30 @@ public class HistoryTracker {
         return difference;
     }
 
+    public Message parseNumbersForDeltas(final Message message) {
+
+        List<String> statisticNumbers = new ArrayList<>();
+
+        for (int i = 0; i < message.getStatisticNumbers().size(); i++) {
+            statisticNumbers.add(message.getStatisticNumbers()
+                    .get(i)
+                    .text()
+                    .trim()
+                    .replaceAll("\\D", ""));
+        }
+        message.setTestsOverall(Long.valueOf(statisticNumbers.get(0)));
+        message.setInfectedOverall(Long.valueOf(statisticNumbers.get(1)));
+        message.setInfectedLastDay(Long.valueOf(statisticNumbers.get(2)));
+        message.setHealedOverall(Long.valueOf(statisticNumbers.get(3)));
+        message.setDeathsOverall(Long.valueOf(statisticNumbers.get(4)));
+        return message;
+    }
+
+    public void updateStatistic(Message message) {
+        saveTodayStatistic(message.getTestsOverall(),
+                message.getInfectedOverall(),
+                message.getInfectedLastDay(),
+                message.getHealedOverall(),
+                message.getDeathsOverall());
+    }
 }
