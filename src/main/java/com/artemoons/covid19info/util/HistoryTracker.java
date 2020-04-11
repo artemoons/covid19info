@@ -1,7 +1,7 @@
 package com.artemoons.covid19info.util;
 
 import com.artemoons.covid19info.dto.HistoryRecord;
-import com.artemoons.covid19info.dto.Message;
+import com.artemoons.covid19info.dto.JsonMessage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -52,14 +52,14 @@ public class HistoryTracker {
         }
     }
 
-    public void saveTodayStatistic(final Long testsO,
-                                   final Long infectedO,
-                                   final Long infectedY,
-                                   final Long healedO,
-                                   final Long deathO) {
+    public void saveTodayJsonStatistic(final Long testsO,
+                                       final Long infectedO,
+                                       final Long healedO,
+                                       final Long deathO) {
         UUID uuid = UUID.randomUUID();
         SimpleDateFormat dateFormat = new SimpleDateFormat(DD_MM_YYYY);
         List<HistoryRecord> previousStatistic;
+        //todo thats a second call
         previousStatistic = readStatisticFile();
 
         HistoryRecord todayStats = new HistoryRecord();
@@ -67,7 +67,6 @@ public class HistoryTracker {
         todayStats.setDate(dateFormat.format(new Date()));
         todayStats.setTestsOverall(testsO);
         todayStats.setInfectedOverall(infectedO);
-        todayStats.setInfectedLastDay(infectedY);
         todayStats.setHealedOverall(healedO);
         todayStats.setDeathsOverall(deathO);
 
@@ -89,40 +88,19 @@ public class HistoryTracker {
     }
 
 
-    public List<Long> getDifference(final Message newMessage, final HistoryRecord oldMessage) {
+    public List<Long> getDifference(final JsonMessage newMessage, final HistoryRecord oldMessage) {
         List<Long> difference = new ArrayList<>();
         difference.add(newMessage.getTestsOverall() - oldMessage.getTestsOverall());
         difference.add(newMessage.getInfectedOverall() - oldMessage.getInfectedOverall());
-        difference.add(newMessage.getInfectedLastDay() - oldMessage.getInfectedLastDay());
         difference.add(newMessage.getHealedOverall() - oldMessage.getHealedOverall());
         difference.add(newMessage.getDeathsOverall() - oldMessage.getDeathsOverall());
         return difference;
     }
 
-    public Message parseNumbersForDeltas(final Message message) {
-
-        List<String> statisticNumbers = new ArrayList<>();
-
-        for (int i = 0; i < message.getStatisticNumbers().size(); i++) {
-            statisticNumbers.add(message.getStatisticNumbers()
-                    .get(i)
-                    .text()
-                    .trim()
-                    .replaceAll("\\D", ""));
-        }
-        message.setTestsOverall(Long.valueOf(statisticNumbers.get(0)));
-        message.setInfectedOverall(Long.valueOf(statisticNumbers.get(1)));
-        message.setInfectedLastDay(Long.valueOf(statisticNumbers.get(2)));
-        message.setHealedOverall(Long.valueOf(statisticNumbers.get(3)));
-        message.setDeathsOverall(Long.valueOf(statisticNumbers.get(4)));
-        return message;
-    }
-
-    public void updateStatistic(Message message) {
-        saveTodayStatistic(message.getTestsOverall(),
-                message.getInfectedOverall(),
-                message.getInfectedLastDay(),
-                message.getHealedOverall(),
-                message.getDeathsOverall());
+    public void updateJsonStatistic(final JsonMessage newStatistic) {
+        saveTodayJsonStatistic(newStatistic.getTestsOverall(),
+                newStatistic.getInfectedOverall(),
+                newStatistic.getHealedOverall(),
+                newStatistic.getDeathsOverall());
     }
 }

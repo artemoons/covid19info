@@ -33,7 +33,7 @@ public class CacheManager {
         try {
             if (Paths.get(syncFileName).toFile().exists()) {
                 cachedValue = new String(Files.readAllBytes(Paths.get(syncFileName)));
-                log.info("Loaded cache from file.");
+                log.info("Loaded cache from file. Value: {}", cachedValue);
             } else {
                 Files.createFile(Paths.get(syncFileName));
                 log.info("Cache file not found. Created new one.");
@@ -51,6 +51,19 @@ public class CacheManager {
         try {
             Files.write(path, message.getBytes());
             cachedValue = message;
+            log.info("Successfully updated cache file!");
+        } catch (IOException ex) {
+            log.error("Can't write cache file.", ex);
+        }
+    }
+
+    public void updateJsonCache(final Long message) {
+
+        Path path = Paths.get(syncFileName);
+
+        try {
+            Files.write(path, message.toString().getBytes());
+            cachedValue = message.toString();
             log.info("Successfully updated cache file!");
         } catch (IOException ex) {
             log.error("Can't write cache file.", ex);

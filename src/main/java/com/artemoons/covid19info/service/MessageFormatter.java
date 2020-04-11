@@ -1,21 +1,26 @@
 package com.artemoons.covid19info.service;
 
 import com.artemoons.covid19info.dto.HistoryRecord;
-import com.artemoons.covid19info.dto.Message;
+import com.artemoons.covid19info.dto.JsonItems;
+import com.artemoons.covid19info.dto.JsonMessage;
 import com.artemoons.covid19info.util.HashManager;
 import com.artemoons.covid19info.util.HistoryTracker;
+import com.artemoons.covid19info.util.StatsCounter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.artemoons.covid19info.helper.MessageFormatterHelper.getText;
-import static com.artemoons.covid19info.helper.MessageFormatterHelper.setSign;
 import static com.artemoons.covid19info.helper.MarkdownFormatter.setBold;
 import static com.artemoons.covid19info.helper.MarkdownFormatter.setItalic;
+import static com.artemoons.covid19info.helper.MessageFormatterHelper.setSign;
 
 @Service
 @Slf4j
@@ -26,69 +31,73 @@ public class MessageFormatter {
 
     HistoryTracker historyTracker;
 
+    StatsCounter statsCounter;
+
     HashManager hashManager;
 
     private static final String EMPTY_LINE = "";
 
     private static final String TITLE_POSTFIX = " (МСК)";
 
-    private static final int TITLE_MESSAGE_INDEX = 0;
-
     @Autowired
     public MessageFormatter(final HistoryTracker historyTracker,
-                            final HashManager hashManager) {
+                            final HashManager hashManager,
+                            final StatsCounter statsCounter) {
         this.historyTracker = historyTracker;
         this.hashManager = hashManager;
+        this.statsCounter = statsCounter;
     }
 
-    public StringBuilder prepareMessageToSend(final Message message) {
-        String newMessageHash = hashManager.calculateHash(message);
-        if (hashManager.previousHashIsDifferent(newMessageHash)) {
-            hashManager.saveLastParseResultInfoHash(newMessageHash);
-            return convertMessageToPlaintext(message);
+    public String prepareJsonMessageToSend(final JsonItems jsonItems) {
+
+        if (hashManager.previousJsonHashIsDifferent(jsonItems)) {
+            hashManager.saveLastParseJsonResultInfoHash(hashManager.calculateJsonHash(jsonItems));
+            return convertJsonMessageToPlaintext(jsonItems);
         }
-        return new StringBuilder("");
+        return "";
     }
 
-    private StringBuilder convertMessageToPlaintext(final Message message) {
+    public String convertJsonMessageToPlaintext(final JsonItems jsonItems) {
 
-        int i;
         List<String> messageLines = new ArrayList<>();
-        StringBuilder plaintextMessage = new StringBuilder();
+        String plaintextMessage = "";
+        LocalTime now = LocalTime.now();
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        String dayAndMonth = today.format(DateTimeFormatter.ofPattern("dd MMMM"));
 
-        Message newMessage = historyTracker.parseNumbersForDeltas(message);
         HistoryRecord oldMessage = historyTracker.loadPreviousDayStatistic();
-        List<Long> difference = historyTracker.getDifference(newMessage, oldMessage);
+        JsonMessage statistic = StatsCounter.countTotalStatistic(jsonItems);
+        List<Long> difference = historyTracker.getDifference(statistic, oldMessage);
 
-        log.info(message.getLastUpdateInformation().get(TITLE_MESSAGE_INDEX).text());
+        if (oldMessage.getDeathsOverall() < statistic.getDeathsOverall()
+                || oldMessage.getHealedOverall() < statistic.getDeathsOverall()) {
 
-        messageLines.add(setBold(message.getLastUpdateInformation().get(TITLE_MESSAGE_INDEX).text() + TITLE_POSTFIX));
-        messageLines.add(EMPTY_LINE);
-        //todo replace on foreach
-        for (i = 0; i < message.getStatisticDescriptions().size(); i++) {
-            log.info(getText(message.getStatisticNumbers().get(i))
-                    + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
-            if (!message.getStatisticDescriptions().get(i).text().contains("сутки")) {
-                if (message.getStatisticDescriptions().get(i).text().contains("тест")) {
-                    messageLines.add(message.getStatisticNumbers().get(i).text().trim()
-                            + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
-                } else {
-                    messageLines.add(getText(message.getStatisticNumbers().get(i))
-                            + " " + message.getStatisticDescriptions().get(i).text().toLowerCase()
-                            + " " + setItalic("(" + setSign(difference.get(i)) + ")"));
-                }
+            messageLines.add(setBold("по состоянию на " + dayAndMonth
+                    + " " + now.minus(4, ChronoUnit.HOURS).format(formatter)
+                    + TITLE_POSTFIX));
+            messageLines.add(EMPTY_LINE);
+            messageLines.add(statistic.getTestsOverall() + " проведено тестов "
+                    + setItalic("(" + setSign(difference.get(0)) + ")"));
+            messageLines.add(statistic.getInfectedOverall() + " случаев заболевания "
+                    + setItalic("(" + setSign(difference.get(1)) + ")"));
+            messageLines.add(statistic.getHealedOverall() + " человек выздоровело "
+                    + setItalic("(" + setSign(difference.get(2)) + ")"));
+            messageLines.add(statistic.getDeathsOverall() + " человек умерло "
+                    + setItalic("(" + setSign(difference.get(3)) + ")"));
+            messageLines.add(EMPTY_LINE);
+            messageLines.add(setItalic(messageFooter));
+
+            for (String item : messageLines) {
+                plaintextMessage = plaintextMessage.concat(item).concat(System.lineSeparator());
             }
+
+            historyTracker.updateJsonStatistic(statistic);
+
+            return plaintextMessage;
+        } else {
+            log.warn("Previous stats values are smaller than new, message not sent.");
+            return "";
         }
-
-        messageLines.add(EMPTY_LINE);
-        messageLines.add(setItalic(messageFooter));
-
-        for (String item : messageLines) {
-            plaintextMessage.append(item).append(System.lineSeparator());
-        }
-
-        historyTracker.updateStatistic(message);
-
-        return plaintextMessage;
     }
 }

@@ -1,12 +1,10 @@
 package com.artemoons.covid19info.util;
 
-import com.artemoons.covid19info.dto.Message;
+import com.artemoons.covid19info.dto.JsonItems;
+import com.artemoons.covid19info.dto.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -19,33 +17,34 @@ public class HashManager {
         this.cacheManager = cacheManager;
     }
 
-    public String calculateHash(final Message message) {
-        List<String> messageLines = new ArrayList<>();
-        for (int i = 0; i < message.getStatisticDescriptions().size(); i++) {
-            messageLines.add(message.getStatisticNumbers().get(i).text()
-                    + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
-        }
-        return String.valueOf(messageLines.hashCode());
+    public Long calculateJsonHash(final JsonItems jsonItems) {
+        JsonMessage statistic = StatsCounter.countTotalStatistic(jsonItems);
+        Long newHash = statistic.getTestsOverall()
+                + statistic.getInfectedOverall()
+                + statistic.getHealedOverall()
+                + statistic.getDeathsOverall();
+        log.info("New message hash: {}", newHash);
+        return newHash;
     }
 
-    public boolean previousHashIsDifferent(final String message) {
-        return Boolean.FALSE.equals(getHashFromHistoryAndCompareTo(message));
+    public boolean previousJsonHashIsDifferent(final JsonItems newHash) {
+        return Boolean.FALSE.equals(getJsonHashFromHistoryAndCompareTo(calculateJsonHash(newHash)));
     }
 
-    private Boolean getHashFromHistoryAndCompareTo(final String message) {
+    private Boolean getJsonHashFromHistoryAndCompareTo(final Long hash) {
 
-        String cache = cacheManager.getCache();
-        if (cache.equals(message)) {
-            log.info("Saved cache equals new value.");
+        Long cache = Long.valueOf(cacheManager.getCache());
+        if (cache.compareTo(hash) == 0 || cache.compareTo(hash) > 0) {
+            log.info("Saved cache equals or more than new value.");
             return true;
         }
-        log.debug("Last parse result info: {}", cache);
+        log.info("Last parse result info: cache - {}, hash - {}", cache, hash);
         log.info("Saved cache different from new value.");
         return false;
     }
 
-    public void saveLastParseResultInfoHash(final String message) {
-        cacheManager.updateCache(message);
+    public void saveLastParseJsonResultInfoHash(final Long message) {
+        cacheManager.updateJsonCache(message);
     }
 
 }

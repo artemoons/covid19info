@@ -20,12 +20,10 @@ import javax.annotation.PostConstruct;
 @EnableScheduling
 public class BotInitializer extends TelegramLongPollingBot {
 
-    private SiteParser siteParser;
+    private SiteLoader siteLoader;
 
-    private HistoryTracker historyTracker;
-
-    @Value("${website.url}")
-    private StringBuilder websiteUrl;
+    @Value("${json.url}")
+    private String url;
 
     @Value("${telegram.channel-name}")
     private String chatId;
@@ -36,14 +34,10 @@ public class BotInitializer extends TelegramLongPollingBot {
     @Value("${bot.username}")
     private String username;
 
-    @Value("${scheduler.delay}")
-    private Long schedulerDelay;
-
     @Autowired
-    public BotInitializer(final DefaultBotOptions options, final SiteParser siteParser, final HistoryTracker historyTracker) {
+    public BotInitializer(final DefaultBotOptions options, final SiteLoader siteLoader) {
         super(options);
-        this.siteParser = siteParser;
-        this.historyTracker = historyTracker;
+        this.siteLoader = siteLoader;
     }
 
     @Override
@@ -69,13 +63,10 @@ public class BotInitializer extends TelegramLongPollingBot {
     @Scheduled(fixedDelayString = "${scheduler.delay}")
     public void onSiteUpdateReceived() {
 
-//        historyTracker.loadPreviousDayStatistic();
-
-
-        StringBuilder messageText = siteParser.loadSite(websiteUrl);
+        String messageText = siteLoader.loadJson(url);
         SendMessage response = new SendMessage();
         response.setChatId(chatId)
-                .setText(messageText.toString())
+                .setText(messageText)
                 .enableMarkdown(true);
 
         try {
