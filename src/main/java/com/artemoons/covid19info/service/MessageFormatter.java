@@ -7,10 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +22,8 @@ public class MessageFormatter {
 
     HistoryTracker historyTracker;
 
+    CacheManager cacheManager;
+
     private static final String EMPTY_LINE = "";
 
     private static final String TITLE_POSTFIX = " (МСК)";
@@ -33,8 +31,9 @@ public class MessageFormatter {
     private static final int TITLE_MESSAGE_INDEX = 0;
 
     @Autowired
-    public MessageFormatter(final HistoryTracker historyTracker) {
+    public MessageFormatter(final HistoryTracker historyTracker, final CacheManager cacheManager) {
         this.historyTracker = historyTracker;
+        this.cacheManager = cacheManager;
     }
 
     public StringBuilder prepareMessageToSend(final Message message) {
@@ -49,7 +48,7 @@ public class MessageFormatter {
     private String calculateHash(final Message message) {
         List<String> messageLines = new ArrayList<>();
         for (int i = 0; i < message.getStatisticDescriptions().size(); i++) {
-            messageLines.add(message.getStatisticNumbers().get(i).text()
+            messageLines.add(message.getStatisticNumbers().get(i).text().trim()
                     + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
         }
         return String.valueOf(messageLines.hashCode());
@@ -61,35 +60,18 @@ public class MessageFormatter {
 
     private Boolean getHashFromHistoryAndCompareTo(final String message) {
 
-        String savedLastParseResult;
-
-        try {
-            if (Paths.get(syncFileName).toFile().exists()) {
-                savedLastParseResult = new String(Files.readAllBytes(Paths.get(syncFileName)));
-            } else {
-                Files.createFile(Paths.get(syncFileName));
-                savedLastParseResult = "";
-            }
-            if (savedLastParseResult.equals(message)) {
-                log.info("Saved parsed result equals new value.");
-                return true;
-            }
-            log.debug("Last parse result info: {}", savedLastParseResult);
-        } catch (IOException ex) {
-            log.error("Can't open file with last parsed result", ex);
+        String cache = cacheManager.getCache();
+        if (cache.equals(message)) {
+            log.info("Saved cache equals new value.");
+            return true;
         }
-        log.info("Saved parsed result different from new value.");
+        log.debug("Last parse result info: {}", cache);
+        log.info("Saved cache different from new value.");
         return false;
     }
 
     private void saveLastParseResultInfoHash(final String message) {
-        Path path = Paths.get(syncFileName);
-        try {
-            Files.write(path, message.getBytes());
-            log.info("Successfully updated last parse result info hash!");
-        } catch (IOException ex) {
-            log.error("Can't write last parse result information to file.", ex);
-        }
+        cacheManager.updateCache(message);
     }
 
     private StringBuilder convertMessageToPlaintext(final Message message) {
@@ -108,15 +90,14 @@ public class MessageFormatter {
         messageLines.add(EMPTY_LINE);
         //todo replace on foreach
         for (i = 0; i < message.getStatisticDescriptions().size(); i++) {
-            log.info(message.getStatisticNumbers().get(i).text()
+            log.info(message.getStatisticNumbers().get(i).text().trim()
                     + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
             if (!message.getStatisticDescriptions().get(i).text().contains("сутки")) {
                 if (message.getStatisticDescriptions().get(i).text().contains("тест")) {
-                    messageLines.add(message.getStatisticNumbers().get(i).text()
-                            + " " + message.getStatisticDescriptions().get(i).text().toLowerCase()
-                            + " " + setItalic("(" + setSign(difference.get(i)) + " тыс." + ")"));
+                    messageLines.add(message.getStatisticNumbers().get(i).text().trim()
+                            + " " + message.getStatisticDescriptions().get(i).text().toLowerCase());
                 } else {
-                    messageLines.add(message.getStatisticNumbers().get(i).text()
+                    messageLines.add(message.getStatisticNumbers().get(i).text().trim()
                             + " " + message.getStatisticDescriptions().get(i).text().toLowerCase()
                             + " " + setItalic("(" + setSign(difference.get(i)) + ")"));
                 }

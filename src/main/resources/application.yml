@@ -7,7 +7,7 @@ telegram:
     port: 9150
     host: 127.0.0.1
     type: socks5
-  channel-name: 
+  channel-name:
   sync-file-name: last-parse-info
 
 website:
