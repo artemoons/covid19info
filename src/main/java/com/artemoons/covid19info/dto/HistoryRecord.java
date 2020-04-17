@@ -13,8 +13,6 @@ public class HistoryRecord {
 
     private String date;
 
-    private Long testsOverall;
-
     private Long infectedOverall;
 
     private Long healedOverall;
@@ -28,7 +26,6 @@ public class HistoryRecord {
         HistoryRecord that = (HistoryRecord) o;
         return Objects.equals(recordId, that.recordId) &&
                 Objects.equals(date, that.date) &&
-                Objects.equals(testsOverall, that.testsOverall) &&
                 Objects.equals(infectedOverall, that.infectedOverall) &&
                 Objects.equals(healedOverall, that.healedOverall) &&
                 Objects.equals(deathsOverall, that.deathsOverall);
@@ -36,6 +33,6 @@ public class HistoryRecord {
 
     @Override
     public int hashCode() {
-        return Objects.hash(recordId, date, testsOverall, infectedOverall, healedOverall, deathsOverall);
+        return Objects.hash(recordId, date, infectedOverall, healedOverall, deathsOverall);
     }
 }

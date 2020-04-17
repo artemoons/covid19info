@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -21,10 +22,13 @@ import java.util.*;
 @Service
 public class HistoryTracker {
 
-    public static final String DD_MM_YYYY = "dd/MM/yyyy";
-    String historyRecords;
-    String historyFilename = "history-tracker.json";
+    @Value("${json.date-format}")
+    private String dateFormat;
 
+    @Value("${json.history.file-name}")
+    private String historyFilename;
+
+    String historyRecords;
 
     public HistoryRecord loadPreviousDayStatistic() {
         List<HistoryRecord> statisticFile = readStatisticFile();
@@ -32,9 +36,8 @@ public class HistoryTracker {
     }
 
     private List<HistoryRecord> readStatisticFile() {
-        Gson gson = new GsonBuilder().setDateFormat(DD_MM_YYYY).setPrettyPrinting().create();
-        Type collectionType = new TypeToken<List<HistoryRecord>>() {
-        }.getType();
+        Gson gson = new GsonBuilder().setDateFormat(dateFormat).setPrettyPrinting().create();
+        Type collectionType = new TypeToken<List<HistoryRecord>>() {}.getType();
         try {
             if (Paths.get(historyFilename).toFile().exists()) {
                 historyRecords = new String(Files.readAllBytes(Paths.get(historyFilename)));
@@ -52,12 +55,11 @@ public class HistoryTracker {
         }
     }
 
-    public void saveTodayJsonStatistic(final Long testsO,
-                                       final Long infectedO,
+    public void saveTodayJsonStatistic(final Long infectedO,
                                        final Long healedO,
                                        final Long deathO) {
         UUID uuid = UUID.randomUUID();
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DD_MM_YYYY);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(this.dateFormat);
         List<HistoryRecord> previousStatistic;
         //todo thats a second call
         previousStatistic = readStatisticFile();
@@ -65,7 +67,6 @@ public class HistoryTracker {
         HistoryRecord todayStats = new HistoryRecord();
         todayStats.setRecordId(uuid.toString());
         todayStats.setDate(dateFormat.format(new Date()));
-        todayStats.setTestsOverall(testsO);
         todayStats.setInfectedOverall(infectedO);
         todayStats.setHealedOverall(healedO);
         todayStats.setDeathsOverall(deathO);
@@ -77,7 +78,7 @@ public class HistoryTracker {
 
     private void writeStatisticFile(final List<HistoryRecord> statisticData) {
         Path path = Paths.get(historyFilename);
-        Gson gson = new GsonBuilder().setDateFormat(DD_MM_YYYY).setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().setDateFormat(dateFormat).setPrettyPrinting().create();
         String json = gson.toJson(statisticData);
         List<String> lines = Arrays.asList(json.split(System.lineSeparator()));
         try {
@@ -87,10 +88,8 @@ public class HistoryTracker {
         }
     }
 
-
     public List<Long> getDifference(final JsonMessage newMessage, final HistoryRecord oldMessage) {
         List<Long> difference = new ArrayList<>();
-        difference.add(newMessage.getTestsOverall() - oldMessage.getTestsOverall());
         difference.add(newMessage.getInfectedOverall() - oldMessage.getInfectedOverall());
         difference.add(newMessage.getHealedOverall() - oldMessage.getHealedOverall());
         difference.add(newMessage.getDeathsOverall() - oldMessage.getDeathsOverall());
@@ -98,8 +97,7 @@ public class HistoryTracker {
     }
 
     public void updateJsonStatistic(final JsonMessage newStatistic) {
-        saveTodayJsonStatistic(newStatistic.getTestsOverall(),
-                newStatistic.getInfectedOverall(),
+        saveTodayJsonStatistic(newStatistic.getInfectedOverall(),
                 newStatistic.getHealedOverall(),
                 newStatistic.getDeathsOverall());
     }

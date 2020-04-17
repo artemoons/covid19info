@@ -69,5 +69,4 @@ public class CacheManager {
             log.error("Can't write cache file.", ex);
         }
     }
-
 }

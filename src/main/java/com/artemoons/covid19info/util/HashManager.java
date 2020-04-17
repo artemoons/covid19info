@@ -19,8 +19,7 @@ public class HashManager {
 
     public Long calculateJsonHash(final JsonItems jsonItems) {
         JsonMessage statistic = StatsCounter.countTotalStatistic(jsonItems);
-        Long newHash = statistic.getTestsOverall()
-                + statistic.getInfectedOverall()
+        Long newHash = statistic.getInfectedOverall()
                 + statistic.getHealedOverall()
                 + statistic.getDeathsOverall();
         log.info("New message hash: {}", newHash);

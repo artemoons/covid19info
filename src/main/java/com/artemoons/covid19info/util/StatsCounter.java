@@ -17,23 +17,12 @@ public class StatsCounter {
 
         Long deaths = 0L;
 
-        Long tests = 0L;
-
         for (int i = 0; i < jsonItems.getItems().size(); i++) {
             confirmed += Long.parseLong(jsonItems.getItems().get(i).getConfirmed());
             recovered += Long.parseLong(jsonItems.getItems().get(i).getRecovered());
             deaths += Long.parseLong(jsonItems.getItems().get(i).getDeaths());
         }
 
-        if (jsonItems.getItems().get(39).getLocationName().equals("No region speified")) {
-            tests = Long.parseLong(jsonItems.getItems().get(39).getObservations());
-            return new JsonMessage(tests, confirmed, recovered, deaths);
-        } else {
-            log.error("Can't get total amount of tests.");
-            return new JsonMessage(0L, 0L, 0L, 0L);
-        }
-
-
+        return new JsonMessage(confirmed, recovered, deaths);
     }
-
 }

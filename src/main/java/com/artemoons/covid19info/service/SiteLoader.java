@@ -17,10 +17,10 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class SiteLoader {
 
-    private RosPotrebNadzorLoader webPage;
+    private StopCoronaVirusRfLoader webPage;
 
     @Autowired
-    public SiteLoader(final RosPotrebNadzorLoader webPage) {
+    public SiteLoader(final StopCoronaVirusRfLoader webPage) {
         this.webPage = webPage;
     }
 

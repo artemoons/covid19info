@@ -7,19 +7,20 @@ telegram:
     port: 9150
     host: 127.0.0.1
     type: socks5
-  channel-name: 
+  channel-name:
   sync-file-name: last-parse-info
 
 json:
-  url: https://covid19.rosminzdrav.ru/wp-json/api/mapdata/
+  url: 
+  date-format: dd/MM/yyyy
+  history:
+    file-name: history-tracker.json
+
+timezone:
+  difference: 4
 
 scheduler:
-  delay: 3000
+  delay: 300000
 
 message:
-  footer: via Минздрав России (covid19.rosminzdrav.ru)
-
-parser:
-  last-update-info: div.cv-banner__left > div.cv-banner__description
-  statistic-number: div.cv-countdown__item > div.cv-countdown__item-value
-  statistic-description: div.cv-countdown__item > div.cv-countdown__item-label
+  footer: via СтопКоронавирус.РФ

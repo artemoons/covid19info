@@ -6,30 +6,15 @@ import lombok.Getter;
 @Getter
 public class JsonItem {
 
-    @SerializedName(value = "LocationName")
+    @SerializedName(value = "location")
     private String locationName;
 
-    @SerializedName(value = "Lat")
-    private String latitude;
-
-    @SerializedName(value = "Lng")
-    private String longitude;
-
-    @SerializedName(value = "Observations")
-    private String observations;
-
-    @SerializedName(value = "Confirmed")
+    @SerializedName(value = "sick")
     private String confirmed;
 
-    @SerializedName(value = "Recovered")
+    @SerializedName(value = "healed")
     private String recovered;
 
-    @SerializedName(value = "Deaths")
+    @SerializedName(value = "died")
     private String deaths;
-
-    @SerializedName(value = "IsoCode")
-    private String isoCode;
-
-    @SerializedName(value = "New")
-    private String isNew;
 }

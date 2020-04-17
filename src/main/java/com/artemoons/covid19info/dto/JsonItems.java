@@ -10,6 +10,6 @@ import java.util.List;
 @Setter
 public class JsonItems {
 
-    @SerializedName(value = "Items")
+    @SerializedName(value = "Regions")
     private List<JsonItem> items;
 }

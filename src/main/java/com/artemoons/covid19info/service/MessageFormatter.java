@@ -29,6 +29,9 @@ public class MessageFormatter {
     @Value("${message.footer}")
     private String messageFooter;
 
+    @Value("${timezone.difference}")
+    private Integer tzDifference;
+
     HistoryTracker historyTracker;
 
     StatsCounter statsCounter;
@@ -70,34 +73,25 @@ public class MessageFormatter {
         JsonMessage statistic = StatsCounter.countTotalStatistic(jsonItems);
         List<Long> difference = historyTracker.getDifference(statistic, oldMessage);
 
-        if (oldMessage.getDeathsOverall() < statistic.getDeathsOverall()
-                || oldMessage.getHealedOverall() < statistic.getDeathsOverall()) {
+        messageLines.add(setBold("по состоянию на " + dayAndMonth
+                + " " + now.minus(tzDifference, ChronoUnit.HOURS).format(formatter)
+                + TITLE_POSTFIX));
+        messageLines.add(EMPTY_LINE);
+        messageLines.add(statistic.getInfectedOverall() + " случаев заболевания "
+                + setItalic("(" + setSign(difference.get(0)) + ")"));
+        messageLines.add(statistic.getHealedOverall() + " человек выздоровело "
+                + setItalic("(" + setSign(difference.get(1)) + ")"));
+        messageLines.add(statistic.getDeathsOverall() + " человек умерло "
+                + setItalic("(" + setSign(difference.get(2)) + ")"));
+        messageLines.add(EMPTY_LINE);
+        messageLines.add(setItalic(messageFooter));
 
-            messageLines.add(setBold("по состоянию на " + dayAndMonth
-                    + " " + now.minus(4, ChronoUnit.HOURS).format(formatter)
-                    + TITLE_POSTFIX));
-            messageLines.add(EMPTY_LINE);
-            messageLines.add(statistic.getTestsOverall() + " проведено тестов "
-                    + setItalic("(" + setSign(difference.get(0)) + ")"));
-            messageLines.add(statistic.getInfectedOverall() + " случаев заболевания "
-                    + setItalic("(" + setSign(difference.get(1)) + ")"));
-            messageLines.add(statistic.getHealedOverall() + " человек выздоровело "
-                    + setItalic("(" + setSign(difference.get(2)) + ")"));
-            messageLines.add(statistic.getDeathsOverall() + " человек умерло "
-                    + setItalic("(" + setSign(difference.get(3)) + ")"));
-            messageLines.add(EMPTY_LINE);
-            messageLines.add(setItalic(messageFooter));
-
-            for (String item : messageLines) {
-                plaintextMessage = plaintextMessage.concat(item).concat(System.lineSeparator());
-            }
-
-            historyTracker.updateJsonStatistic(statistic);
-
-            return plaintextMessage;
-        } else {
-            log.warn("Previous stats values are smaller than new, message not sent.");
-            return "";
+        for (String item : messageLines) {
+            plaintextMessage = plaintextMessage.concat(item).concat(System.lineSeparator());
         }
+
+        historyTracker.updateJsonStatistic(statistic);
+
+        return plaintextMessage;
     }
 }
