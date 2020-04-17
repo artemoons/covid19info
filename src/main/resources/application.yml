@@ -11,7 +11,7 @@ telegram:
   sync-file-name: last-parse-info
 
 json:
-  url: 
+  url:
   date-format: dd/MM/yyyy
   history:
     file-name: history-tracker.json
