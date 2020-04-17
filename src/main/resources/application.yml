@@ -20,7 +20,7 @@ timezone:
   difference: 4
 
 scheduler:
-  delay: 300000
+  delay: 60000
 
 message:
   footer: via СтопКоронавирус.РФ

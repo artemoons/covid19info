@@ -8,6 +8,38 @@ This is a bot for Telegram written on Java with help of Spring Boot Framework.
 It parse JSON that's based on information from стопкоронавирус.рф (https://xn--80aesfpebagmfblc0a.xn--p1ai/) 
 and send obtained information to Telegram chat @coronavirus19statistic.
 
+## Data sources
+This bot requires JSON message for its input. And there is no source of it is bundled with this app. Yet. I will 
+create second module in future that will produce it, so stay tuned.
+
+```json{
+  "Regions": [
+    {
+      "location": "Москва",
+      "sick": "16146",
+      "healed": "1394",
+      "died": "113"
+    },
+    {
+      "location": "Московская область",
+      "sick": "3054",
+      "healed": "91",
+      "died": "33"
+    },
+    {
+      "location": "Санкт-Петербург",
+      "sick": "1083",
+      "healed": "110",
+      "died": "7"
+    }
+  ]
+}
+```
+
+One official datasource that I found around the web is 
+https://covid19.rosminzdrav.ru/wp-json/api/mapdata/, but to use it, you have to make some changes to files in DTO package.
+In this bot I don't use it because it has delay around 20-30 minutes from СтопКоронавирус.рф.
+
 ## How to build
 To build this bot you need to run Maven command `mvn clean install` in the
 directory with root pom.xml file.
@@ -34,9 +66,11 @@ type - socks5).
 | timezone.difference     | Difference in hours with Moscow                                |
 | message.footer          | Message footer                                                 |
 
+After this, you can run bot by command `mvn spring-boot:run` in parent directory or 
+`java -jar <jar file name>`.
+
 ## Known bugs
 1. All help files should present in parent directory (on one level with executable .jar file).
 2. If internet connection is lost completely, bot with crash after some time
 
-After this, you can run bot by command `mvn spring-boot:run` in parent directory or 
-`java -jar <jar file name>`.
+
