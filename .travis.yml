@@ -1,0 +1,11 @@
+language: java
+before_script:
+  - echo "Start new build"
+script:
+  - mvn clean package
+after_script:
+  - echo "Build finished"
+after_success:
+  - echo "Everything's OK! $TRAVIS_TEST_RESULT"
+after_failure:
+  - echo "Build failed!"
