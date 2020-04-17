@@ -2,7 +2,7 @@
 
 ## About
 
-![](https://s423sas.storage.yandex.net/rdisk/dee6e4d917dfa2d3834d94e51830106d9e439cb0efeb8c28d78202001bc76327/5e9950ad/-szdBF0zXYottYN909ERDeo7pfCPxlBES8Yqzg1wlY0VQpER7p7Hd-fhi94imO0GeX0Z75Aut0TUpFBMPFD3IA==?uid=35573294&filename=%D0%90%D0%BD%D0%BD%D0%BE%D1%82%D0%B0%D1%86%D0%B8%D1%8F+2020-04-17+094437.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&tknv=v2&owner_uid=35573294&fsize=11403&media_type=image&etag=8dc78907c0553fad1d769329d578f4f1&hid=4a333388f660b602ac3af3fb39072c77&rtoken=P2PwEqwAowRB&force_default=yes&ycrid=na-af2d5b2183da60227d533d0ced409ef1-downloader20e&ts=5a376e743c540&s=19190855b4486c3bdfa570979b1b50596a0770ac5da0fe244c276fcb1bedf647&pb=U2FsdGVkX18qMpNpOuMAY-GOBjeCKik4A2dWuyJ8Qk2jBSoEfW7PQPMbTUhgOE564YvYEdW5wm5dUhPEOyljvfmToeUdj6PwDl44YcHvQEY)
+![](https://raw.githubusercontent.com/temautkin/covid19info/develop/wiki/pics/message-preview.png)
 
 This is a bot for Telegram written on Java with help of Spring Boot Framework. 
 It parse JSON that's based on information from стопкоронавирус.рф (https://xn--80aesfpebagmfblc0a.xn--p1ai/) 
