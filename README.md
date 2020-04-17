@@ -5,8 +5,8 @@
 ![](https://raw.githubusercontent.com/temautkin/covid19info/develop/wiki/pics/message-preview.png)
 
 This is a bot for Telegram written on Java with help of Spring Boot Framework. 
-It parse JSON that's based on information from стопкоронавирус.рф (https://xn--80aesfpebagmfblc0a.xn--p1ai/) 
-and send obtained information to Telegram chat @coronavirus19statistic.
+It parse JSON that's based on information from СтопКоронавирус.рф (https://xn--80aesfpebagmfblc0a.xn--p1ai/) 
+and send obtained information to Telegram channel @coronavirus19statistic.
 
 ## Data sources
 This bot requires JSON message for its input. And there is no source of it is bundled with this app. Yet. I will 
