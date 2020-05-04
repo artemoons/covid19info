@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.artemoons</groupId>
-    <artifactId>covid19-info</artifactId>
+    <artifactId>covid19-info-russia</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>covid19-info</name>
+    <name>covid19-info-russia</name>
     <description>Telegram Bot for getting last information about CoViD-19 from official sources</description>
 
     <properties>

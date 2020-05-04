@@ -19,6 +19,8 @@ public class HistoryRecord {
 
     private Long deathsOverall;
 
+    private Long activeOverall;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -28,11 +30,12 @@ public class HistoryRecord {
                 Objects.equals(date, that.date) &&
                 Objects.equals(infectedOverall, that.infectedOverall) &&
                 Objects.equals(healedOverall, that.healedOverall) &&
-                Objects.equals(deathsOverall, that.deathsOverall);
+                Objects.equals(deathsOverall, that.deathsOverall) &&
+                Objects.equals(activeOverall, that.activeOverall);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(recordId, date, infectedOverall, healedOverall, deathsOverall);
+        return Objects.hash(recordId, date, infectedOverall, healedOverall, deathsOverall, activeOverall);
     }
 }

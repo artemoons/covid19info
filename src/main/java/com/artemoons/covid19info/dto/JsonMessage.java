@@ -15,10 +15,16 @@ public class JsonMessage {
 
     private Long deathsOverall;
 
-    public JsonMessage(Long infectedOverall, Long healedOverall, Long deathsOverall) {
+    private Long activeOverall;
+
+    public JsonMessage(final Long infectedOverall,
+                       final Long healedOverall,
+                       final Long deathsOverall,
+                       final Long activeOverall) {
         this.infectedOverall = infectedOverall;
         this.healedOverall = healedOverall;
         this.deathsOverall = deathsOverall;
+        this.activeOverall = activeOverall;
     }
 
     @Override
@@ -26,13 +32,14 @@ public class JsonMessage {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         JsonMessage that = (JsonMessage) o;
-        return Objects.equals(infectedOverall, that.infectedOverall)
-                && Objects.equals(healedOverall, that.healedOverall)
-                && Objects.equals(deathsOverall, that.deathsOverall);
+        return Objects.equals(infectedOverall, that.infectedOverall) &&
+                Objects.equals(healedOverall, that.healedOverall) &&
+                Objects.equals(deathsOverall, that.deathsOverall) &&
+                Objects.equals(activeOverall, that.activeOverall);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(infectedOverall, healedOverall, deathsOverall);
+        return Objects.hash(infectedOverall, healedOverall, deathsOverall, activeOverall);
     }
 }

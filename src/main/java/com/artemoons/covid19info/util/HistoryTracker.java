@@ -57,7 +57,8 @@ public class HistoryTracker {
 
     public void saveTodayJsonStatistic(final Long infectedO,
                                        final Long healedO,
-                                       final Long deathO) {
+                                       final Long deathO,
+                                       final Long activeO) {
         UUID uuid = UUID.randomUUID();
         SimpleDateFormat dateFormat = new SimpleDateFormat(this.dateFormat);
         List<HistoryRecord> previousStatistic;
@@ -70,6 +71,7 @@ public class HistoryTracker {
         todayStats.setInfectedOverall(infectedO);
         todayStats.setHealedOverall(healedO);
         todayStats.setDeathsOverall(deathO);
+        todayStats.setActiveOverall(activeO);
 
         previousStatistic.add(todayStats);
         writeStatisticFile(previousStatistic);
@@ -93,12 +95,14 @@ public class HistoryTracker {
         difference.add(newMessage.getInfectedOverall() - oldMessage.getInfectedOverall());
         difference.add(newMessage.getHealedOverall() - oldMessage.getHealedOverall());
         difference.add(newMessage.getDeathsOverall() - oldMessage.getDeathsOverall());
+        difference.add(newMessage.getActiveOverall() - oldMessage.getActiveOverall());
         return difference;
     }
 
     public void updateJsonStatistic(final JsonMessage newStatistic) {
         saveTodayJsonStatistic(newStatistic.getInfectedOverall(),
                 newStatistic.getHealedOverall(),
-                newStatistic.getDeathsOverall());
+                newStatistic.getDeathsOverall(),
+                newStatistic.getActiveOverall());
     }
 }

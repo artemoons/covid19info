@@ -1,10 +1,13 @@
 package com.artemoons.covid19info.util;
 
+import com.artemoons.covid19info.dto.JsonItem;
 import com.artemoons.covid19info.dto.JsonItems;
 import com.artemoons.covid19info.dto.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -17,7 +20,7 @@ public class HashManager {
         this.cacheManager = cacheManager;
     }
 
-    public Long calculateJsonHash(final JsonItems jsonItems) {
+    public Long calculateJsonHash(final List<JsonItem> jsonItems) {
         JsonMessage statistic = StatsCounter.countTotalStatistic(jsonItems);
         Long newHash = statistic.getInfectedOverall()
                 + statistic.getHealedOverall()
@@ -26,7 +29,7 @@ public class HashManager {
         return newHash;
     }
 
-    public boolean previousJsonHashIsDifferent(final JsonItems newHash) {
+    public boolean previousJsonHashIsDifferent(final List<JsonItem> newHash) {
         return Boolean.FALSE.equals(getJsonHashFromHistoryAndCompareTo(calculateJsonHash(newHash)));
     }
 
