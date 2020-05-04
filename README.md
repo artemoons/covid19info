@@ -1,5 +1,5 @@
 # **CoVID-19 Info bot for Telegram**
-[![Build Status](https://travis-ci.com/temautkin/covid19info.svg?branch=develop)](https://travis-ci.com/temautkin/covid19info)
+[![Build Status](https://travis-ci.com/artemoons/covid19info.svg?branch=develop)](https://travis-ci.com/artemoons/covid19info)
 ## About
 
 ![](https://raw.githubusercontent.com/temautkin/covid19info/develop/wiki/pics/message-preview.png)
