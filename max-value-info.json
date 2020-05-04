@@ -1,8 +1,8 @@
 [
   {
-    "confirmedMaxValue": 68,
-    "healedMaxValue": 95,
-    "deathsMaxValue": 156,
+    "confirmedMaxValue": 17,
+    "healedMaxValue": 8,
+    "deathsMaxValue": 1,
     "activeMaxValue": 0
   }
 ]

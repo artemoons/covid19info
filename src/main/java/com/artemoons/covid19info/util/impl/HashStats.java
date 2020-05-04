@@ -1,18 +1,16 @@
-package com.artemoons.covid19info.util;
+package com.artemoons.covid19info.util.impl;
 
 import com.artemoons.covid19info.dto.JsonItem;
-import com.artemoons.covid19info.dto.JsonItems;
 import com.artemoons.covid19info.dto.JsonMessage;
-import lombok.extern.slf4j.Slf4j;
+import com.artemoons.covid19info.util.HashCounter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@Slf4j
-public class StatsCounter {
+public class HashStats implements HashCounter {
 
-    public static JsonMessage countTotalStatistic(final List<JsonItem> jsonItems) {
+    public JsonMessage countRussiaStatistic(final List<JsonItem> jsonItems) {
 
         Long confirmed = 0L;
 

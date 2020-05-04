@@ -14,20 +14,21 @@ import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Service
 @Slf4j
 public class SiteLoader {
 
-    private StopCoronaVirusRfLoader webPage;
+    private RosPotrebNadzorLoader webPage;
 
     @Autowired
-    public SiteLoader(final StopCoronaVirusRfLoader webPage) {
+    public SiteLoader(final RosPotrebNadzorLoader webPage) {
         this.webPage = webPage;
     }
 
-    public String loadJson(final String url) {
+    public List<String> loadJson(final String url) {
 
         log.info("Starting to load data...");
         try (InputStream is = new URL(url).openStream();
@@ -39,6 +40,6 @@ public class SiteLoader {
         } catch (IOException ex) {
             log.error("Error occurred when trying to load API URL!", ex);
         }
-        return "";
+        return Collections.emptyList();
     }
 }

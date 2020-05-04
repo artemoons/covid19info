@@ -2,12 +2,11 @@ package com.artemoons.covid19info.service;
 
 import com.artemoons.covid19info.dto.HistoryRecord;
 import com.artemoons.covid19info.dto.JsonItem;
-import com.artemoons.covid19info.dto.JsonItems;
 import com.artemoons.covid19info.dto.JsonMessage;
 import com.artemoons.covid19info.util.AntirecordTracker;
 import com.artemoons.covid19info.util.HashManager;
 import com.artemoons.covid19info.util.HistoryTracker;
-import com.artemoons.covid19info.util.StatsCounter;
+import com.artemoons.covid19info.util.StatisticCounter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +17,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.artemoons.covid19info.helper.MarkdownFormatter.setBold;
@@ -30,17 +30,13 @@ public class MessageFormatter {
 
     @Value("${message.footer}")
     private String messageFooter;
-
-    @Value("${timezone.difference}")
-    private Integer tzDifference;
-
     HistoryTracker historyTracker;
-
-    StatsCounter statsCounter;
 
     HashManager hashManager;
 
     AntirecordTracker antirecordTracker;
+
+    StatisticCounter statisticCounter;
 
     private static final String EMPTY_LINE = "";
 
@@ -49,61 +45,76 @@ public class MessageFormatter {
     @Autowired
     public MessageFormatter(final HistoryTracker historyTracker,
                             final HashManager hashManager,
-                            final StatsCounter statsCounter,
-                            final AntirecordTracker antirecordTracker) {
+                            final AntirecordTracker antirecordTracker,
+                            final StatisticCounter statisticCounter) {
         this.historyTracker = historyTracker;
         this.hashManager = hashManager;
-        this.statsCounter = statsCounter;
         this.antirecordTracker = antirecordTracker;
+        this.statisticCounter = statisticCounter;
     }
 
-    public String prepareJsonMessageToSend(final List<JsonItem> jsonItems) {
+    public List<String> prepareJsonMessageToSend(final List<JsonItem> jsonItems) {
 
         if (hashManager.previousJsonHashIsDifferent(jsonItems)) {
             hashManager.saveLastParseJsonResultInfoHash(hashManager.calculateJsonHash(jsonItems));
             return convertJsonMessageToPlaintext(jsonItems);
         }
-        return "";
+        return Collections.emptyList();
     }
 
-    public String convertJsonMessageToPlaintext(final List<JsonItem> jsonItems) {
+    public List<String> convertJsonMessageToPlaintext(final List<JsonItem> jsonItems) {
 
         List<String> messageLines = new ArrayList<>();
+        List<String> messageWithoutFormatting = new ArrayList<>();
+        List<String> message = new ArrayList<>();
         String plaintextMessage = "";
+        String plaintextWithoutFormatting = "";
         LocalTime now = LocalTime.now();
         LocalDate today = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         String dayAndMonth = today.format(DateTimeFormatter.ofPattern("dd MMMM"));
 
-        HistoryRecord oldMessage = historyTracker.loadPreviousDayStatistic();
-        JsonMessage statistic = StatsCounter.countTotalStatistic(jsonItems);
-        List<Long> difference = historyTracker.getDifference(statistic, oldMessage);
+        HistoryRecord oldStatistic = historyTracker.loadPreviousDayStatistic();
+        JsonMessage statistic = statisticCounter.countStatistic(jsonItems);
+        List<Long> difference = historyTracker.getDifference(statistic, oldStatistic);
 
         String infectedIncreased = antirecordTracker.infectedNumberIncreased(difference);
         String healedIncreased = antirecordTracker.healedNumberIncreased(difference);
         String deathsIncreased = antirecordTracker.deathsNumberIncreased(difference);
 
         messageLines.add(setBold("по состоянию на " + dayAndMonth
-                + " " + now.minus(tzDifference, ChronoUnit.HOURS).format(formatter)
+                + " " + now.minus(4, ChronoUnit.HOURS).format(formatter)
                 + TITLE_POSTFIX));
         messageLines.add(EMPTY_LINE);
-        messageLines.add(statistic.getInfectedOverall() + " случаев заболевания "
+        messageLines.add(statistic.getInfectedOverall() + " подтверждено "
                 + setItalic("(" + setSign(difference.get(0)) + ")") + infectedIncreased);
-        messageLines.add(statistic.getHealedOverall() + " человек выздоровело "
+        messageLines.add(statistic.getHealedOverall() + " выздоровело "
                 + setItalic("(" + setSign(difference.get(1)) + ")") + healedIncreased);
         messageLines.add(statistic.getActiveOverall() + " болеют "
                 + setItalic("(" + setSign(difference.get(3)) + ")"));
-        messageLines.add(statistic.getDeathsOverall() + " человек умерло "
+        messageLines.add(statistic.getDeathsOverall() + " смертей "
                 + setItalic("(" + setSign(difference.get(2)) + ")") + deathsIncreased);
         messageLines.add(EMPTY_LINE);
         messageLines.add(setItalic(messageFooter));
+
+        messageWithoutFormatting.add(String.valueOf(statistic.getInfectedOverall()));
+        messageWithoutFormatting.add(String.valueOf(statistic.getHealedOverall()));
+        messageWithoutFormatting.add(String.valueOf(statistic.getActiveOverall()));
+        messageWithoutFormatting.add(String.valueOf(statistic.getDeathsOverall()));
+
+        for (String item : messageWithoutFormatting) {
+            plaintextWithoutFormatting = plaintextWithoutFormatting.concat(item).concat(System.lineSeparator());
+        }
 
         for (String item : messageLines) {
             plaintextMessage = plaintextMessage.concat(item).concat(System.lineSeparator());
         }
 
+        message.add(plaintextMessage);
+        message.add(plaintextWithoutFormatting);
+
         historyTracker.updateJsonStatistic(statistic);
 
-        return plaintextMessage;
+        return message;
     }
 }

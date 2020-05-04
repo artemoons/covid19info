@@ -21,6 +21,20 @@ public class HistoryRecord {
 
     private Long activeOverall;
 
+    public HistoryRecord(final String recordId,
+                         final String date,
+                         final Long infectedOverall,
+                         final Long healedOverall,
+                         final Long deathsOverall,
+                         final Long activeOverall) {
+        this.recordId = recordId;
+        this.date = date;
+        this.infectedOverall = infectedOverall;
+        this.healedOverall = healedOverall;
+        this.deathsOverall = deathsOverall;
+        this.activeOverall = activeOverall;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

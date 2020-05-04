@@ -1,7 +1,6 @@
 package com.artemoons.covid19info.service.impl;
 
 import com.artemoons.covid19info.dto.JsonItem;
-import com.artemoons.covid19info.dto.JsonItems;
 import com.artemoons.covid19info.service.MessageFormatter;
 import com.artemoons.covid19info.service.RosPotrebNadzorLoader;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,7 @@ public class RosPotrebNadzor implements RosPotrebNadzorLoader {
     }
 
     @Override
-    public String parse(final List<JsonItem> jsonItems) {
+    public List<String> parse(final List<JsonItem> jsonItems) {
         return messageFormatter.prepareJsonMessageToSend(jsonItems);
     }
 }

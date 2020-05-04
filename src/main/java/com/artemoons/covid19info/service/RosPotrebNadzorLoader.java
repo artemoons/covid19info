@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface RosPotrebNadzorLoader {
 
-    String parse(final List<JsonItem> jsonItems);
+    List<String> parse(final List<JsonItem> jsonItems);
 
 }

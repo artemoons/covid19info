@@ -33,9 +33,9 @@ public class JsonMessage {
         if (o == null || getClass() != o.getClass()) return false;
         JsonMessage that = (JsonMessage) o;
         return Objects.equals(infectedOverall, that.infectedOverall) &&
-                Objects.equals(healedOverall, that.healedOverall) &&
-                Objects.equals(deathsOverall, that.deathsOverall) &&
-                Objects.equals(activeOverall, that.activeOverall);
+                        Objects.equals(healedOverall, that.healedOverall) &&
+                        Objects.equals(deathsOverall, that.deathsOverall) &&
+                        Objects.equals(activeOverall, that.activeOverall);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.artemoons.covid19info.util;
 
-
 import com.artemoons.covid19info.dto.MaxValues;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
