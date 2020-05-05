@@ -1,6 +1,6 @@
 bot:
   token:
-  username: 
+  username:
 
 telegram:
   proxy:
@@ -8,10 +8,15 @@ telegram:
     host: 127.0.0.1
     type: socks5
   channel-name:
+
+stats:
+  root-dir: data
   sync-file-name: last-parse-info
+  max-values-name: "max-value-info.json"
+  history-tracker-name: "history-tracker.json"
 
 json:
-  url:
+  url: 
 
 operation:
   mode: region
