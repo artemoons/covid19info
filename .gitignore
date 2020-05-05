@@ -6,6 +6,7 @@ mwnw.cmd
 !**/src/main/**
 !**/src/test/**
 history-tracker.json
+max-value-info.json
 
 ### STS ###
 .apt_generated

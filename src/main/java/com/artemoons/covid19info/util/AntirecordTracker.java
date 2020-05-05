@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -24,7 +25,16 @@ public class AntirecordTracker {
 
     public static final String DD_MM_YYYY = "dd/MM/yyyy";
 
-    String maxValuesFilename = "max-value-info.json";
+    @Value("${stats.max-values-name}")
+    String maxValuesFilename;
+
+    @Value("${stats.root-dir}")
+    private String rootDir;
+
+    @Value("${operation.mode}")
+    private String operationMode;
+
+    private String maxesFileLocation;
 
     String maxValuesRecord;
 
@@ -89,14 +99,16 @@ public class AntirecordTracker {
 
     public List<MaxValues> loadMaxValues() {
 
+        maxesFileLocation = rootDir + "/" + operationMode + "/" + maxValuesFilename;
+
         try {
-            if (Paths.get(maxValuesFilename).toFile().exists()) {
-                maxValuesRecord = new String(Files.readAllBytes(Paths.get(maxValuesFilename)));
+            if (Paths.get(maxesFileLocation).toFile().exists()) {
+                maxValuesRecord = new String(Files.readAllBytes(Paths.get(maxesFileLocation)));
                 MaxValues[] maxValues = new Gson().fromJson(maxValuesRecord, MaxValues[].class);
                 log.info("Successfully loaded maximum value information.");
                 return Arrays.asList(maxValues);
             } else {
-                Files.createFile(Paths.get(maxValuesFilename));
+                Files.createFile(Paths.get(maxesFileLocation));
                 return Collections.emptyList();
             }
         } catch (JsonSyntaxException | IOException ex) {
@@ -107,7 +119,7 @@ public class AntirecordTracker {
 
     public void writeMaxValues(final List<MaxValues> newMaxValues) {
 
-        Path path = Paths.get(maxValuesFilename);
+        Path path = Paths.get(maxesFileLocation);
         Gson gson = new GsonBuilder().setDateFormat(DD_MM_YYYY).setPrettyPrinting().create();
         String json = gson.toJson(newMaxValues);
         List<String> lines = Arrays.asList(json.split(System.lineSeparator()));

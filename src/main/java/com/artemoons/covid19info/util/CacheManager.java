@@ -15,8 +15,16 @@ import static org.springframework.util.StringUtils.hasText;
 @Slf4j
 public class CacheManager {
 
-    @Value("${telegram.sync-file-name}")
+    @Value("${stats.sync-file-name}")
     private String syncFileName;
+
+    @Value("${stats.root-dir}")
+    private String rootDir;
+
+    @Value("${operation.mode}")
+    private String operationMode;
+
+    private String syncFileLocation;
 
     private String cachedValue;
 
@@ -30,12 +38,14 @@ public class CacheManager {
 
     private String loadCache() {
 
+        syncFileLocation = rootDir + "/" + operationMode + "/" + syncFileName;
+
         try {
-            if (Paths.get(syncFileName).toFile().exists()) {
-                cachedValue = new String(Files.readAllBytes(Paths.get(syncFileName)));
+            if (Paths.get(syncFileLocation).toFile().exists()) {
+                cachedValue = new String(Files.readAllBytes(Paths.get(syncFileLocation)));
                 log.info("Loaded cache from file. Value: {}", cachedValue);
             } else {
-                Files.createFile(Paths.get(syncFileName));
+                Files.createFile(Paths.get(syncFileLocation));
                 log.info("Cache file not found. Created new one.");
             }
         } catch (IOException ex) {
@@ -46,7 +56,7 @@ public class CacheManager {
 
     public void updateCache(final String message) {
 
-        Path path = Paths.get(syncFileName);
+        Path path = Paths.get(syncFileLocation);
 
         try {
             Files.write(path, message.getBytes());
@@ -59,7 +69,7 @@ public class CacheManager {
 
     public void updateJsonCache(final Long message) {
 
-        Path path = Paths.get(syncFileName);
+        Path path = Paths.get(syncFileLocation);
 
         try {
             Files.write(path, message.toString().getBytes());

@@ -9,6 +9,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -26,8 +27,19 @@ public class HistoryTracker {
 
     //todo: externalize
     public static final String DD_MM_YYYY = "dd/MM/yyyy";
+
     String historyRecords;
-    String historyFilename = "history-tracker.json";
+
+    @Value("${stats.history-tracker-name}")
+    String historyFilename;
+
+    @Value("${stats.root-dir}")
+    private String rootDir;
+
+    @Value("${operation.mode}")
+    private String operationMode;
+
+    private String historyFileLocation;
 
     SlowMode slowMode;
 
@@ -38,6 +50,9 @@ public class HistoryTracker {
 
 
     public HistoryRecord loadPreviousDayStatistic() {
+
+        historyFileLocation = rootDir + "/" + operationMode + "/" + historyFilename;
+
         List<HistoryRecord> statisticFile = readStatisticFile();
 
         if (!statisticFile.isEmpty()) {
@@ -59,13 +74,13 @@ public class HistoryTracker {
         Type collectionType = new TypeToken<List<HistoryRecord>>() {
         }.getType();
         try {
-            if (Paths.get(historyFilename).toFile().exists()) {
-                historyRecords = new String(Files.readAllBytes(Paths.get(historyFilename)));
+            if (Paths.get(historyFileLocation).toFile().exists()) {
+                historyRecords = new String(Files.readAllBytes(Paths.get(historyFileLocation)));
                 List<HistoryRecord> historyLog = gson.fromJson(historyRecords, collectionType);
                 log.info("Successfully loaded history stats information.");
                 return historyLog;
             } else {
-                Files.createFile(Paths.get(historyFilename));
+                Files.createFile(Paths.get(historyFileLocation));
                 return Collections.emptyList();
             }
         } catch (JsonSyntaxException | IOException ex) {
@@ -107,7 +122,7 @@ public class HistoryTracker {
     }
 
     private void writeStatisticFile(final List<HistoryRecord> statisticData) {
-        Path path = Paths.get(historyFilename);
+        Path path = Paths.get(historyFileLocation);
         Gson gson = new GsonBuilder().setDateFormat(DD_MM_YYYY).setPrettyPrinting().create();
         String json = gson.toJson(statisticData);
         List<String> lines = Arrays.asList(json.split(System.lineSeparator()));
