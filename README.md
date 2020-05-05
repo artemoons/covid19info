@@ -1,5 +1,10 @@
 # **CoVID-19 Info bot for Telegram**
 [![Build Status](https://travis-ci.com/artemoons/covid19info.svg?branch=develop)](https://travis-ci.com/artemoons/covid19info)
+## Working examples
+
+Russia - https://teleg.run/coronavirus19statistic (@coronavirus19statistic)  
+Tomskaya oblast - https://teleg.run/covid19tomsk (@covid19tomsk)
+
 ## About
 
 ![](https://raw.githubusercontent.com/temautkin/covid19info/develop/wiki/pics/message-preview.png)
