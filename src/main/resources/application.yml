@@ -1,6 +1,6 @@
 bot:
   token:
-  username:
+  username: 
 
 telegram:
   proxy:
@@ -12,15 +12,16 @@ telegram:
 
 json:
   url:
-  date-format: dd/MM/yyyy
-  history:
-    file-name: history-tracker.json
 
-timezone:
-  difference: 4
+operation:
+  mode: region
+  region-name: "Томская область"
 
 scheduler:
   delay: 60000
+
+slowmode:
+  timeout: 600000
 
 message:
   footer: via СтопКоронавирус.РФ
