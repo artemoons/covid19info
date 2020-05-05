@@ -10,6 +10,9 @@ import lombok.Setter;
 @Builder
 public class MaxValues {
 
+    @SerializedName(value = "date")
+    private String date;
+
     @SerializedName(value = "confirmedMaxValue")
     private Long confirmedMaxValue;
 

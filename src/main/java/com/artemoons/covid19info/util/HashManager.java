@@ -32,8 +32,8 @@ public class HashManager {
         return newHash;
     }
 
-    public boolean previousJsonHashIsDifferent(final List<JsonItem> newHash) {
-        return Boolean.FALSE.equals(getJsonHashFromHistoryAndCompareTo(calculateJsonHash(newHash)));
+    public boolean previousJsonHashIsDifferent(final List<JsonItem> newMessage) {
+        return Boolean.FALSE.equals(getJsonHashFromHistoryAndCompareTo(calculateJsonHash(newMessage)));
     }
 
     private Boolean getJsonHashFromHistoryAndCompareTo(final Long hash) {
